@@ -1,0 +1,36 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+.price-table {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    background: rgb(193, 230, 237);
+    border: 2px solid rgb(62, 147, 164);
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    z-index: 1000; /* Ensure it is on top of the canvas */
+}
+
+.price-table table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.price-table th, .price-table td {
+    border: 2px solid rgb(62, 147, 164);
+    padding: 5px 10px;
+    text-align: left;
+}
+
+.price-table input[type="number"] {
+    background-color: rgb(229, 240, 243);
+    border: 2px solid rgb(62, 147, 164); /* Change this to your desired color */
+}
+
+.total-price {
+    margin-top: 10px;
+    font-weight: bold;
+}
