@@ -14,6 +14,13 @@ var Eisdealer;
         Sprinkles: [
             { name: "Chocolate Sprinkles", price: 0.30, color: "#583E26" },
             { name: "Star Sprinkles", price: 0.30, color: "#F2A60A" },
+        ],
+        Tables: [
+            { name: "Table 1", price: 0, color: "pink" },
+            { name: "Table 2", price: 0, color: "pink" },
+            { name: "Table 3", price: 0, color: "pink" },
+            { name: "Table 4", price: 0, color: "pink" },
+            { name: "Table 5", price: 0, color: "pink" }
         ]
     };
 })(Eisdealer || (Eisdealer = {}));

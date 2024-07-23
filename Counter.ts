@@ -14,7 +14,7 @@ namespace Eisdealer{
             crc2.translate(this.positionX, this.positionY);
             
             crc2.fillStyle = "#ccc";
-            crc2.fillRect(0, 0, 1000, 260);
+            crc2.fillRect(0, 0, 880, 370);
             crc2.restore();
 
           

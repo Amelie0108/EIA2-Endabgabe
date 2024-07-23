@@ -25,12 +25,60 @@ body {
     text-align: left;
 }
 
-.price-table input[type="number"] {
+.price-table input[type="number"], .price-table select {
     background-color: rgb(229, 240, 243);
     border: 2px solid rgb(62, 147, 164); /* Change this to your desired color */
+    padding: 2px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.price-table select {
+    background-color: rgb(229, 240, 243);
+    border: 2px solid rgb(62, 147, 164); /* Change this to your desired color */
+    padding: 5px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .total-price {
     margin-top: 10px;
     font-weight: bold;
+}
+
+.table-select {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+button {
+    background-color: rgb(229, 240, 243);
+    border: 2px solid rgb(62, 147, 164);
+    padding: 10px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+button:hover {
+    background-color: rgb(193, 230, 237);
+    border-color: rgb(62, 147, 164);
+}
+
+.pay-button {
+    background-color: rgb(229, 240, 243);
+    border: 2px solid rgb(62, 147, 164);
+    padding: 10px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.pay-button:hover {
+    background-color: rgb(193, 230, 237);
+    border-color: rgb(62, 147, 164);
 }

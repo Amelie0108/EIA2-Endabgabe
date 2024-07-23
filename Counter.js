@@ -12,7 +12,7 @@ var Eisdealer;
             Eisdealer.crc2.save();
             Eisdealer.crc2.translate(this.positionX, this.positionY);
             Eisdealer.crc2.fillStyle = "#ccc";
-            Eisdealer.crc2.fillRect(0, 0, 1000, 260);
+            Eisdealer.crc2.fillRect(0, 0, 880, 370);
             Eisdealer.crc2.restore();
             Eisdealer.crc2.restore();
         }

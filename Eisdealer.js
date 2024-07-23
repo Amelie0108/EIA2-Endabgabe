@@ -7,6 +7,10 @@ var Eisdealer;
     Eisdealer.iceCreamCircles = [];
     Eisdealer.sauces = [];
     Eisdealer.sprinkles = [];
+    Eisdealer.orderText = [];
+    let tableItems = {};
+    let payButtons = {};
+    let orderTexts = {};
     function handleLoad(_event) {
         let canvas = document.querySelector("canvas");
         if (!canvas)
@@ -16,12 +20,16 @@ var Eisdealer;
         Eisdealer.crc2 = canvas.getContext("2d");
         drawBackground();
         drawPriceTable();
-        Eisdealer.tables.push(new Eisdealer.Table(1450, 200, 130, 'pink'));
-        Eisdealer.tables.push(new Eisdealer.Table(1450, 550, 100, 'pink'));
-        Eisdealer.tables.push(new Eisdealer.Table(250, 700, 130, 'pink'));
-        Eisdealer.tables.push(new Eisdealer.Table(610, 460, 130, 'pink'));
-        Eisdealer.tables.push(new Eisdealer.Table(760, 780, 120, 'pink'));
-        for (let table of Eisdealer.tables) {
+        const tablePositions = [
+            { x: 1450, y: 200, radius: 130 },
+            { x: 1450, y: 550, radius: 100 },
+            { x: 250, y: 700, radius: 130 },
+            { x: 610, y: 460, radius: 130 },
+            { x: 760, y: 780, radius: 120 }
+        ];
+        for (let pos of tablePositions) {
+            let table = new Eisdealer.Table(pos.x, pos.y, pos.radius, 'pink');
+            Eisdealer.tables.push(table);
             table.draw();
         }
         let counter = new Eisdealer.Counter(20, 20);
@@ -101,12 +109,116 @@ var Eisdealer;
         }
         table.appendChild(tbody);
         priceTableDiv.appendChild(table);
+        // Add the table selection dropdown below the table
+        let tableSelectDiv = document.createElement("div");
+        tableSelectDiv.className = "table-select";
+        let tableSelectLabel = document.createElement("label");
+        tableSelectLabel.textContent = "Select a Table: ";
+        tableSelectDiv.appendChild(tableSelectLabel);
+        let tableSelect = document.createElement("select");
+        tableSelect.innerHTML = `
+            <option value="">Select a Table</option>
+            <option value="0">Table 1</option>
+            <option value="1">Table 2</option>
+            <option value="2">Table 3</option>
+            <option value="3">Table 4</option>
+            <option value="4">Table 5</option>
+        `;
+        tableSelectDiv.appendChild(tableSelect);
+        priceTableDiv.appendChild(tableSelectDiv);
+        let saveButton = document.createElement("button");
+        saveButton.textContent = "Save and Serve Ice Cream";
+        saveButton.addEventListener("click", () => handleSaveButton(tableSelect));
+        priceTableDiv.appendChild(saveButton);
         let totalPriceDiv = document.createElement("div");
         totalPriceDiv.className = "total-price";
         totalPriceDiv.textContent = "Total: 0.00 €";
         priceTableDiv.appendChild(totalPriceDiv);
         appDiv.appendChild(priceTableDiv);
         priceTableDiv.addEventListener("input", calculateTotalPrice);
+    }
+    function handleSaveButton(tableSelect) {
+        let tableIndex = parseInt(tableSelect.value);
+        if (tableIndex >= 0 && tableIndex < Eisdealer.tables.length) {
+            moveIceCreamToTable(tableIndex);
+            resetTable();
+        }
+        else {
+            alert("Please select a valid table.");
+        }
+    }
+    function moveIceCreamToTable(tableIndex) {
+        let selectedTable = Eisdealer.tables[tableIndex];
+        // Clone the current ice cream circles, sauces, and sprinkles
+        let items = [
+            ...Eisdealer.iceCreamCircles.map(circle => new Eisdealer.IceCreamCircle(selectedTable.positionX, selectedTable.positionY, circle.radius, circle.color, circle.category, circle.index)),
+            ...Eisdealer.sauces.map(sauce => new Eisdealer.Sauce(selectedTable.positionX, selectedTable.positionY - 5, sauce.color, sauce.category, sauce.index)),
+            ...Eisdealer.sprinkles.map(sprinkle => new Eisdealer.Sprinkle(selectedTable.positionX, selectedTable.positionY, sprinkle.color, sprinkle.category, sprinkle.index))
+        ];
+        if (!tableItems[tableIndex]) {
+            tableItems[tableIndex] = [];
+        }
+        tableItems[tableIndex].push(...items);
+        // Find the closest customer to the selected table
+        let closestCustomer = null;
+        let minDistance = Infinity;
+        for (let customer of Eisdealer.customers) {
+            let distance = Math.sqrt(Math.pow(customer.centerX - selectedTable.positionX, 2) +
+                Math.pow(customer.centerY - selectedTable.positionY, 2));
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCustomer = customer;
+            }
+        }
+        if (closestCustomer) {
+            closestCustomer.interact();
+            showOrderText(closestCustomer); // Show order text when customer interacts with the table
+        }
+        drawIceCreamCircles();
+        // Set a timeout to remove the ice cream circles after 15 seconds
+        setTimeout(() => {
+            tableItems[tableIndex] = tableItems[tableIndex].filter(item => !items.includes(item));
+            drawIceCreamCircles();
+            showPayButton(tableIndex, closestCustomer);
+        }, 15000);
+        // Hide the order text after the ice cream has been served
+        if (closestCustomer) {
+            hideOrderText(closestCustomer);
+        }
+    }
+    function showPayButton(tableIndex, customer) {
+        if (!customer)
+            return;
+        let button = document.createElement("button");
+        button.textContent = "Pay";
+        button.className = "pay-button";
+        button.style.position = "absolute";
+        button.style.left = `${Eisdealer.tables[tableIndex].positionX + 20}px`;
+        button.style.top = `${Eisdealer.tables[tableIndex].positionY + 20}px`;
+        button.addEventListener("click", () => {
+            removeCustomer(customer);
+            button.remove();
+        });
+        document.body.appendChild(button);
+        payButtons[tableIndex] = button;
+    }
+    function removeCustomer(customer) {
+        Eisdealer.customers = Eisdealer.customers.filter(c => c !== customer);
+        hideOrderText(customer);
+        drawIceCreamCircles();
+    }
+    function resetTable() {
+        let inputs = document.querySelectorAll(".price-table input[type='number']");
+        inputs.forEach(input => {
+            input.value = "0";
+        });
+        let tableSelect = document.querySelector(".table-select select");
+        tableSelect.value = "";
+        // Clear current ice cream circles on the waffle
+        Eisdealer.iceCreamCircles = [];
+        Eisdealer.sauces = [];
+        Eisdealer.sprinkles = [];
+        drawIceCreamCircles();
     }
     function calculateTotalPrice() {
         let total = 0;
@@ -197,6 +309,15 @@ var Eisdealer;
         return { x, y };
     }
     function drawIceCreamCircles() {
+        Eisdealer.crc2.clearRect(0, 0, Eisdealer.crc2.canvas.width, Eisdealer.crc2.canvas.height);
+        // Redraw the background and other elements
+        drawBackground();
+        drawCounter();
+        drawTables();
+        for (let customer of Eisdealer.customers) {
+            customer.draw();
+        }
+        // Draw the ice cream circles on the waffle
         for (let circle of Eisdealer.iceCreamCircles) {
             circle.draw();
         }
@@ -205,6 +326,12 @@ var Eisdealer;
         }
         for (let sprinkle of Eisdealer.sprinkles) {
             sprinkle.draw();
+        }
+        // Draw the ice cream circles at the tables
+        for (let tableIndex in tableItems) {
+            tableItems[tableIndex].forEach(item => {
+                item.draw();
+            });
         }
         Eisdealer.waffle.draw();
     }
@@ -217,21 +344,45 @@ var Eisdealer;
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    function animate() {
-        // Clear the canvas
-        Eisdealer.crc2.clearRect(0, 0, Eisdealer.crc2.canvas.width, Eisdealer.crc2.canvas.height);
-        // Redraw the background, tables, and counter
-        drawBackground();
-        drawTables();
-        drawCounter();
-        // Draw all customers
-        for (let customer of Eisdealer.customers) {
-            customer.draw();
+    function generateOrderText() {
+        let numScoops = getRandomInt(1, 4); // Max 4 scoops
+        let scoops = [];
+        for (let i = 0; i < numScoops; i++) {
+            let randomIndex = getRandomInt(0, Eisdealer.data.IceCream.length - 1);
+            scoops.push(Eisdealer.data.IceCream[randomIndex].name);
         }
-        // Draw all ice cream circles
-        drawIceCreamCircles();
+        let hasSauce = Math.random() < 0.5;
+        let sauceText = "";
+        if (hasSauce) {
+            let randomIndex = getRandomInt(0, Eisdealer.data.Sauce.length - 1);
+            sauceText = ` with ${Eisdealer.data.Sauce[randomIndex].name} sauce`;
+        }
+        let hasSprinkles = Math.random() < 0.5;
+        let sprinkleText = "";
+        if (hasSprinkles) {
+            let randomIndex = getRandomInt(0, Eisdealer.data.Sprinkles.length - 1);
+            sprinkleText = ` with ${Eisdealer.data.Sprinkles[randomIndex].name} sprinkles`;
+        }
+        return `I would like ${numScoops} scoop(s) of ${scoops.join(", ")}${sauceText}${sprinkleText}.`;
+    }
+    function showOrderText(customer) {
+        let orderText = generateOrderText();
+        let orderTextObject = new Eisdealer.OrderText(customer, orderText);
+        orderTexts[customer.centerX] = orderTextObject;
+        console.log(`Order text shown for customer at (${customer.centerX}, ${customer.centerY}): "${orderText}"`);
+    }
+    function hideOrderText(customer) {
+        let orderTextObject = orderTexts[customer.centerX];
+        if (orderTextObject) {
+            orderTextObject.remove();
+            delete orderTexts[customer.centerX];
+        }
+    }
+    function animate() {
         // Request next animation frame
         requestAnimationFrame(animate);
+        // Draw all elements
+        drawIceCreamCircles();
     }
     function drawTables() {
         for (let table of Eisdealer.tables) {
