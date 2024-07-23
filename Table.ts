@@ -1,10 +1,9 @@
 namespace Eisdealer {
 
-    let currentCustomerIndex = 0; // Track the current customer to be moved
-    let tableNumber = 1; 
+    let currentCustomerIndex = 0;
+    let tableNumber = 1;
 
-    export class Table { 
-
+    export class Table {
         public positionX: number;
         public positionY: number;
         public radius: number;
@@ -65,5 +64,3 @@ namespace Eisdealer {
             }
         }
     }
-
-    

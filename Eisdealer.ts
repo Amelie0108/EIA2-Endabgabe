@@ -1,6 +1,6 @@
 namespace Eisdealer {
 
-    window.addEventListener("load", handleLoad);
+   window.addEventListener("load", handleLoad);
     export let crc2: CanvasRenderingContext2D;
 
     export let tables: Table[] = [];
@@ -9,11 +9,9 @@ namespace Eisdealer {
     export let sauces: Sauce[] = [];
     export let sprinkles: Sprinkle[] = [];
     export let waffle: Waffle;
-    export let orderText: OrderText[] = [];
 
     let tableItems: { [key: number]: (IceCreamCircle | Sauce | Sprinkle)[] } = {};
     let payButtons: { [key: number]: HTMLButtonElement } = {};
-    let orderTexts: { [key: number]: OrderText } = {};
 
     function handleLoad(_event: Event): void {
         let canvas: HTMLCanvasElement | null = document.querySelector("canvas");
@@ -27,12 +25,12 @@ namespace Eisdealer {
         drawBackground();
         drawPriceTable();
 
-        const tablePositions = [
+        let tablePositions = [
             { x: 1450, y: 200, radius: 130 },
-            { x: 1450, y: 550, radius: 100 },
+            { x: 1500, y: 550, radius: 100 },
             { x: 250, y: 700, radius: 130 },
-            { x: 610, y: 460, radius: 130 },
-            { x: 760, y: 780, radius: 120 }
+            { x: 610, y: 550, radius: 130 },
+            { x: 1060, y: 660, radius: 120 }
         ];
 
         for (let pos of tablePositions) {
@@ -214,7 +212,6 @@ namespace Eisdealer {
 
         if (closestCustomer) {
             closestCustomer.interact();
-            showOrderText(closestCustomer); // Show order text when customer interacts with the table
         }
 
         drawIceCreamCircles();
@@ -225,11 +222,6 @@ namespace Eisdealer {
             drawIceCreamCircles();
             showPayButton(tableIndex, closestCustomer);
         }, 15000);
-
-        // Hide the order text after the ice cream has been served
-        if (closestCustomer) {
-            hideOrderText(closestCustomer);
-        }
     }
 
     function showPayButton(tableIndex: number, customer: Customer | null): void {
@@ -253,7 +245,6 @@ namespace Eisdealer {
 
     function removeCustomer(customer: Customer): void {
         customers = customers.filter(c => c !== customer);
-        hideOrderText(customer);
         drawIceCreamCircles();
     }
 
@@ -424,46 +415,6 @@ namespace Eisdealer {
 
     function getRandomInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function generateOrderText(): string {
-        let numScoops = getRandomInt(1, 4); // Max 4 scoops
-        let scoops = [];
-        for (let i = 0; i < numScoops; i++) {
-            let randomIndex = getRandomInt(0, data.IceCream.length - 1);
-            scoops.push(data.IceCream[randomIndex].name);
-        }
-
-        let hasSauce = Math.random() < 0.5;
-        let sauceText = "";
-        if (hasSauce) {
-            let randomIndex = getRandomInt(0, data.Sauce.length - 1);
-            sauceText = ` with ${data.Sauce[randomIndex].name} sauce`;
-        }
-
-        let hasSprinkles = Math.random() < 0.5;
-        let sprinkleText = "";
-        if (hasSprinkles) {
-            let randomIndex = getRandomInt(0, data.Sprinkles.length - 1);
-            sprinkleText = ` with ${data.Sprinkles[randomIndex].name} sprinkles`;
-        }
-
-        return `I would like ${numScoops} scoop(s) of ${scoops.join(", ")}${sauceText}${sprinkleText}.`;
-    }
-
-    function showOrderText(customer: Customer): void {
-        let orderText = generateOrderText();
-        let orderTextObject = new OrderText(customer, orderText);
-        orderTexts[customer.centerX] = orderTextObject;
-        console.log(`Order text shown for customer at (${customer.centerX}, ${customer.centerY}): "${orderText}"`);
-    }
-
-    function hideOrderText(customer: Customer): void {
-        let orderTextObject = orderTexts[customer.centerX];
-        if (orderTextObject) {
-            orderTextObject.remove();
-            delete orderTexts[customer.centerX];
-        }
     }
 
     function animate(): void {

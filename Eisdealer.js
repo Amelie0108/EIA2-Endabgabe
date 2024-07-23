@@ -7,10 +7,8 @@ var Eisdealer;
     Eisdealer.iceCreamCircles = [];
     Eisdealer.sauces = [];
     Eisdealer.sprinkles = [];
-    Eisdealer.orderText = [];
     let tableItems = {};
     let payButtons = {};
-    let orderTexts = {};
     function handleLoad(_event) {
         let canvas = document.querySelector("canvas");
         if (!canvas)
@@ -20,12 +18,12 @@ var Eisdealer;
         Eisdealer.crc2 = canvas.getContext("2d");
         drawBackground();
         drawPriceTable();
-        const tablePositions = [
+        let tablePositions = [
             { x: 1450, y: 200, radius: 130 },
-            { x: 1450, y: 550, radius: 100 },
+            { x: 1500, y: 550, radius: 100 },
             { x: 250, y: 700, radius: 130 },
-            { x: 610, y: 460, radius: 130 },
-            { x: 760, y: 780, radius: 120 }
+            { x: 610, y: 550, radius: 130 },
+            { x: 1060, y: 660, radius: 120 }
         ];
         for (let pos of tablePositions) {
             let table = new Eisdealer.Table(pos.x, pos.y, pos.radius, 'pink');
@@ -172,7 +170,6 @@ var Eisdealer;
         }
         if (closestCustomer) {
             closestCustomer.interact();
-            showOrderText(closestCustomer); // Show order text when customer interacts with the table
         }
         drawIceCreamCircles();
         // Set a timeout to remove the ice cream circles after 15 seconds
@@ -181,10 +178,6 @@ var Eisdealer;
             drawIceCreamCircles();
             showPayButton(tableIndex, closestCustomer);
         }, 15000);
-        // Hide the order text after the ice cream has been served
-        if (closestCustomer) {
-            hideOrderText(closestCustomer);
-        }
     }
     function showPayButton(tableIndex, customer) {
         if (!customer)
@@ -204,7 +197,6 @@ var Eisdealer;
     }
     function removeCustomer(customer) {
         Eisdealer.customers = Eisdealer.customers.filter(c => c !== customer);
-        hideOrderText(customer);
         drawIceCreamCircles();
     }
     function resetTable() {
@@ -343,40 +335,6 @@ var Eisdealer;
     }
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    function generateOrderText() {
-        let numScoops = getRandomInt(1, 4); // Max 4 scoops
-        let scoops = [];
-        for (let i = 0; i < numScoops; i++) {
-            let randomIndex = getRandomInt(0, Eisdealer.data.IceCream.length - 1);
-            scoops.push(Eisdealer.data.IceCream[randomIndex].name);
-        }
-        let hasSauce = Math.random() < 0.5;
-        let sauceText = "";
-        if (hasSauce) {
-            let randomIndex = getRandomInt(0, Eisdealer.data.Sauce.length - 1);
-            sauceText = ` with ${Eisdealer.data.Sauce[randomIndex].name} sauce`;
-        }
-        let hasSprinkles = Math.random() < 0.5;
-        let sprinkleText = "";
-        if (hasSprinkles) {
-            let randomIndex = getRandomInt(0, Eisdealer.data.Sprinkles.length - 1);
-            sprinkleText = ` with ${Eisdealer.data.Sprinkles[randomIndex].name} sprinkles`;
-        }
-        return `I would like ${numScoops} scoop(s) of ${scoops.join(", ")}${sauceText}${sprinkleText}.`;
-    }
-    function showOrderText(customer) {
-        let orderText = generateOrderText();
-        let orderTextObject = new Eisdealer.OrderText(customer, orderText);
-        orderTexts[customer.centerX] = orderTextObject;
-        console.log(`Order text shown for customer at (${customer.centerX}, ${customer.centerY}): "${orderText}"`);
-    }
-    function hideOrderText(customer) {
-        let orderTextObject = orderTexts[customer.centerX];
-        if (orderTextObject) {
-            orderTextObject.remove();
-            delete orderTexts[customer.centerX];
-        }
     }
     function animate() {
         // Request next animation frame

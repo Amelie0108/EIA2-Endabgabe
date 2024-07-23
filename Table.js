@@ -1,7 +1,7 @@
 "use strict";
 var Eisdealer;
 (function (Eisdealer) {
-    let currentCustomerIndex = 0; // Track the current customer to be moved
+    let currentCustomerIndex = 0;
     let tableNumber = 1;
     class Table {
         positionX;
